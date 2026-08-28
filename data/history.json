@@ -1,0 +1,156 @@
+{
+  "CUST-1002": [
+    {
+      "ticket_id": "TIC-0198",
+      "order_id": "ORD-4222",
+      "opened_at": "2026-03-24",
+      "closed_at": "2026-03-25",
+      "channel": "chat",
+      "category": "shipping",
+      "summary": "Asked when the second book would arrive",
+      "resolution": "resolved"
+    },
+    {
+      "ticket_id": "TIC-0231",
+      "order_id": "ORD-4310",
+      "opened_at": "2026-06-12",
+      "closed_at": "2026-06-14",
+      "channel": "email",
+      "category": "return",
+      "summary": "Wanted to return the book after reading part of it",
+      "resolution": "escalated"
+    }
+  ],
+  "CUST-1001": [
+    {
+      "ticket_id": "TIC-0244",
+      "order_id": "ORD-4350",
+      "opened_at": "2026-06-19",
+      "closed_at": "2026-06-19",
+      "channel": "chat",
+      "category": "shipping",
+      "summary": "Confirmed delivery address before dispatch",
+      "resolution": "resolved"
+    },
+    {
+      "ticket_id": "TIC-0314",
+      "order_id": "ORD-4199",
+      "opened_at": "2026-01-28",
+      "closed_at": "2026-01-29",
+      "channel": "chat",
+      "category": "return",
+      "summary": "Wrong edition received",
+      "resolution": "resolved"
+    }
+  ],
+  "CUST-1003": [
+    {
+      "ticket_id": "TIC-0256",
+      "order_id": "ORD-4300",
+      "opened_at": "2026-05-13",
+      "closed_at": "2026-05-15",
+      "channel": "email",
+      "category": "shipping",
+      "summary": "Delivery later than the estimate for Belgium",
+      "resolution": "resolved"
+    },
+    {
+      "ticket_id": "TIC-0301",
+      "order_id": "ORD-4455",
+      "opened_at": "2026-09-02",
+      "closed_at": null,
+      "channel": "chat",
+      "category": "shipping",
+      "summary": "Parcel not moving for several days",
+      "resolution": "escalated"
+    }
+  ],
+  "CUST-1005": [
+    {
+      "ticket_id": "TIC-0261",
+      "order_id": "ORD-4288",
+      "opened_at": "2026-04-20",
+      "closed_at": "2026-04-20",
+      "channel": "chat",
+      "category": "other",
+      "summary": "Asked for an invoice copy",
+      "resolution": "resolved"
+    },
+    {
+      "ticket_id": "TIC-0309",
+      "order_id": null,
+      "opened_at": "2026-08-27",
+      "closed_at": "2026-08-28",
+      "channel": "email",
+      "category": "account",
+      "summary": "Requested a copy of stored personal data",
+      "resolution": "resolved"
+    }
+  ],
+  "CUST-1006": [
+    {
+      "ticket_id": "TIC-0273",
+      "order_id": "ORD-4390",
+      "opened_at": "2026-07-22",
+      "closed_at": null,
+      "channel": "email",
+      "category": "return",
+      "summary": "Gift wrap was missing from the parcel",
+      "resolution": "abandoned"
+    },
+    {
+      "ticket_id": "TIC-0320",
+      "order_id": null,
+      "opened_at": "2026-09-04",
+      "closed_at": "2026-09-04",
+      "channel": "chat",
+      "category": "other",
+      "summary": "Asked whether gift cards can be refunded",
+      "resolution": "resolved"
+    }
+  ],
+  "CUST-1004": [
+    {
+      "ticket_id": "TIC-0288",
+      "order_id": "ORD-4415",
+      "opened_at": "2026-08-09",
+      "closed_at": "2026-08-10",
+      "channel": "chat",
+      "category": "account",
+      "summary": "Password reset link not received",
+      "resolution": "resolved"
+    },
+    {
+      "ticket_id": "TIC-0325",
+      "order_id": "ORD-4278",
+      "opened_at": "2026-04-06",
+      "closed_at": "2026-04-07",
+      "channel": "email",
+      "category": "shipping",
+      "summary": "Parcel left with a neighbour",
+      "resolution": "resolved"
+    }
+  ],
+  "CUST-1007": [
+    {
+      "ticket_id": "TIC-0295",
+      "order_id": "ORD-4444",
+      "opened_at": "2026-08-14",
+      "closed_at": "2026-08-14",
+      "channel": "chat",
+      "category": "shipping",
+      "summary": "Asked to track the parcel",
+      "resolution": "resolved"
+    },
+    {
+      "ticket_id": "TIC-0331",
+      "order_id": null,
+      "opened_at": "2026-09-06",
+      "closed_at": null,
+      "channel": "chat",
+      "category": "other",
+      "summary": "Asked about a price seen on another site",
+      "resolution": "escalated"
+    }
+  ]
+}

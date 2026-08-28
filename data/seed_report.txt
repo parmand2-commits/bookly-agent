@@ -1,0 +1,9 @@
+Rejected rows:
+  R-00132: missing customer_id
+  R-00133: delivery_date earlier than order_date
+
+Counts:
+  rows read: 33
+  rows rejected: 2
+  orders built: 22
+  customers built: 7

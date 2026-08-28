@@ -1,0 +1,559 @@
+{
+  "ORD-4471": {
+    "order_id": "ORD-4471",
+    "customer_id": "CUST-1001",
+    "order_date": "2026-09-03",
+    "order_status": "in_transit",
+    "delivery_date": null,
+    "shipping_country": "FR",
+    "shipping_cost_eur": 0.0,
+    "payment_last4": "4417",
+    "channel": "web",
+    "notes": [],
+    "items": [
+      {
+        "sku": "BK-9780691018546",
+        "title": "On War",
+        "author": "Carl von Clausewitz",
+        "qty": 1,
+        "price_eur": 32.0
+      }
+    ],
+    "subtotal_eur": 32.0
+  },
+  "ORD-4488": {
+    "order_id": "ORD-4488",
+    "customer_id": "CUST-1001",
+    "order_date": "2026-09-07",
+    "order_status": "processing",
+    "delivery_date": null,
+    "shipping_country": "FR",
+    "shipping_cost_eur": 4.9,
+    "payment_last4": "4417",
+    "channel": "app",
+    "notes": [
+      "cliente a demandé si les 2 arrivent ensemble"
+    ],
+    "items": [
+      {
+        "sku": "BK-9780140449334",
+        "title": "Meditations",
+        "author": "Marcus Aurelius",
+        "qty": 1,
+        "price_eur": 11.5
+      },
+      {
+        "sku": "BK-9780140440072",
+        "title": "Anabasis",
+        "author": "Xenophon",
+        "qty": 1,
+        "price_eur": 18.75
+      }
+    ],
+    "subtotal_eur": 30.25
+  },
+  "ORD-4350": {
+    "order_id": "ORD-4350",
+    "customer_id": "CUST-1001",
+    "order_date": "2026-06-10",
+    "order_status": "delivered",
+    "delivery_date": "2026-06-17",
+    "shipping_country": "FR",
+    "shipping_cost_eur": 4.9,
+    "payment_last4": "4417",
+    "channel": "web",
+    "notes": [],
+    "items": [
+      {
+        "sku": "BK-9780140044300",
+        "title": "The Face of Battle",
+        "author": "John Keegan",
+        "qty": 1,
+        "price_eur": 16.4
+      }
+    ],
+    "subtotal_eur": 16.4
+  },
+  "ORD-4402": {
+    "order_id": "ORD-4402",
+    "customer_id": "CUST-1002",
+    "order_date": "2026-08-28",
+    "order_status": "delivered",
+    "delivery_date": "2026-09-03",
+    "shipping_country": "FR",
+    "shipping_cost_eur": 0.0,
+    "payment_last4": "8823",
+    "channel": "web",
+    "notes": [],
+    "items": [
+      {
+        "sku": "BK-9780140449334",
+        "title": "Meditations",
+        "author": "Marcus Aurelius",
+        "qty": 1,
+        "price_eur": 11.5
+      },
+      {
+        "sku": "BK-9780140449150",
+        "title": "The Prince",
+        "author": "Niccolo Machiavelli",
+        "qty": 1,
+        "price_eur": 10.2
+      }
+    ],
+    "subtotal_eur": 21.7
+  },
+  "ORD-4310": {
+    "order_id": "ORD-4310",
+    "customer_id": "CUST-1002",
+    "order_date": "2026-05-30",
+    "order_status": "delivered",
+    "delivery_date": "2026-06-05",
+    "shipping_country": "FR",
+    "shipping_cost_eur": 0.0,
+    "payment_last4": "8823",
+    "channel": "web",
+    "notes": [
+      "client rappelle en aout au sujet de ce livre"
+    ],
+    "items": [
+      {
+        "sku": "BK-9780199325153",
+        "title": "Strategy: A History",
+        "author": "Lawrence Freedman",
+        "qty": 1,
+        "price_eur": 26.8
+      }
+    ],
+    "subtotal_eur": 26.8
+  },
+  "ORD-4222": {
+    "order_id": "ORD-4222",
+    "customer_id": "CUST-1002",
+    "order_date": "2026-03-15",
+    "order_status": "delivered",
+    "delivery_date": "2026-03-22",
+    "shipping_country": "FR",
+    "shipping_cost_eur": 0.0,
+    "payment_last4": "8823",
+    "channel": "web",
+    "notes": [],
+    "items": [
+      {
+        "sku": "BK-9780140440393",
+        "title": "The Peloponnesian War",
+        "author": "Thucydides",
+        "qty": 1,
+        "price_eur": 24.5
+      },
+      {
+        "sku": "BK-9780226500362",
+        "title": "Discourses on Livy",
+        "author": "Niccolo Machiavelli",
+        "qty": 1,
+        "price_eur": 28.4
+      }
+    ],
+    "subtotal_eur": 52.9
+  },
+  "ORD-4455": {
+    "order_id": "ORD-4455",
+    "customer_id": "CUST-1003",
+    "order_date": "2026-08-22",
+    "order_status": "shipped",
+    "delivery_date": null,
+    "shipping_country": "BE",
+    "shipping_cost_eur": 0.0,
+    "payment_last4": "1194",
+    "channel": "web",
+    "notes": [
+      "retard signalé par le transporteur"
+    ],
+    "items": [
+      {
+        "sku": "BK-9780521546577",
+        "title": "Supplying War",
+        "author": "Martin van Creveld",
+        "qty": 1,
+        "price_eur": 34.2
+      },
+      {
+        "sku": "BK-9780195014761",
+        "title": "The Art of War",
+        "author": "Sun Tzu",
+        "qty": 2,
+        "price_eur": 12.9
+      }
+    ],
+    "subtotal_eur": 60.0
+  },
+  "ORD-4460": {
+    "order_id": "ORD-4460",
+    "customer_id": "CUST-1003",
+    "order_date": "2026-08-30",
+    "order_status": "cancelled",
+    "delivery_date": null,
+    "shipping_country": "BE",
+    "shipping_cost_eur": 5.9,
+    "payment_last4": "1194",
+    "channel": "app",
+    "notes": [
+      "annulé par la cliente avant expédition"
+    ],
+    "items": [
+      {
+        "sku": "BK-9780140449082",
+        "title": "The Histories",
+        "author": "Herodotus",
+        "qty": 1,
+        "price_eur": 21.3
+      }
+    ],
+    "subtotal_eur": 21.3
+  },
+  "ORD-4300": {
+    "order_id": "ORD-4300",
+    "customer_id": "CUST-1003",
+    "order_date": "2026-05-02",
+    "order_status": "delivered",
+    "delivery_date": "2026-05-11",
+    "shipping_country": "BE",
+    "shipping_cost_eur": 5.9,
+    "payment_last4": "1194",
+    "channel": "web",
+    "notes": [],
+    "items": [
+      {
+        "sku": "BK-9780241951804",
+        "title": "Wolf Hall",
+        "author": "Hilary Mantel",
+        "qty": 1,
+        "price_eur": 14.6
+      }
+    ],
+    "subtotal_eur": 14.6
+  },
+  "ORD-4501": {
+    "order_id": "ORD-4501",
+    "customer_id": "CUST-1004",
+    "order_date": "2026-08-15",
+    "order_status": "delivered",
+    "delivery_date": "2026-08-19",
+    "shipping_country": "BE",
+    "shipping_cost_eur": 0.0,
+    "payment_last4": "3306",
+    "channel": "web",
+    "notes": [],
+    "items": [
+      {
+        "sku": "BK-9780025236608",
+        "title": "The Campaigns of Napoleon",
+        "author": "David Chandler",
+        "qty": 1,
+        "price_eur": 45.0
+      }
+    ],
+    "subtotal_eur": 45.0
+  },
+  "ORD-4415": {
+    "order_id": "ORD-4415",
+    "customer_id": "CUST-1004",
+    "order_date": "2026-08-01",
+    "order_status": "delivered",
+    "delivery_date": "2026-08-08",
+    "shipping_country": "BE",
+    "shipping_cost_eur": 5.9,
+    "payment_last4": "3306",
+    "channel": "app",
+    "notes": [],
+    "items": [
+      {
+        "sku": "BK-9780156013987",
+        "title": "The Little Prince",
+        "author": "Antoine de Saint-Exupery",
+        "qty": 1,
+        "price_eur": 9.8
+      },
+      {
+        "sku": "BK-9780140449334",
+        "title": "Meditations",
+        "author": "Marcus Aurelius",
+        "qty": 1,
+        "price_eur": 11.5
+      }
+    ],
+    "subtotal_eur": 21.3
+  },
+  "ORD-4288": {
+    "order_id": "ORD-4288",
+    "customer_id": "CUST-1005",
+    "order_date": "2026-04-11",
+    "order_status": "delivered",
+    "delivery_date": "2026-04-18",
+    "shipping_country": "DE",
+    "shipping_cost_eur": 0.0,
+    "payment_last4": "7751",
+    "channel": "web",
+    "notes": [],
+    "items": [
+      {
+        "sku": "BK-9780140440072",
+        "title": "Anabasis",
+        "author": "Xenophon",
+        "qty": 1,
+        "price_eur": 18.75
+      },
+      {
+        "sku": "BK-9780061120084",
+        "title": "To Kill a Mockingbird",
+        "author": "Harper Lee",
+        "qty": 1,
+        "price_eur": 13.2
+      }
+    ],
+    "subtotal_eur": 31.95
+  },
+  "ORD-4512": {
+    "order_id": "ORD-4512",
+    "customer_id": "CUST-1005",
+    "order_date": "2026-09-05",
+    "order_status": "in_transit",
+    "delivery_date": null,
+    "shipping_country": "DE",
+    "shipping_cost_eur": 0.0,
+    "payment_last4": "7751",
+    "channel": "web",
+    "notes": [],
+    "items": [
+      {
+        "sku": "BK-9780199325153",
+        "title": "Strategy: A History",
+        "author": "Lawrence Freedman",
+        "qty": 1,
+        "price_eur": 26.8
+      }
+    ],
+    "subtotal_eur": 26.8
+  },
+  "ORD-4201": {
+    "order_id": "ORD-4201",
+    "customer_id": "CUST-1005",
+    "order_date": "2026-02-03",
+    "order_status": "delivered",
+    "delivery_date": "2026-02-10",
+    "shipping_country": "DE",
+    "shipping_cost_eur": 6.5,
+    "payment_last4": "7751",
+    "channel": "app",
+    "notes": [],
+    "items": [
+      {
+        "sku": "BK-9780140449150",
+        "title": "The Prince",
+        "author": "Niccolo Machiavelli",
+        "qty": 1,
+        "price_eur": 10.2
+      }
+    ],
+    "subtotal_eur": 10.2
+  },
+  "ORD-4477": {
+    "order_id": "ORD-4477",
+    "customer_id": "CUST-1006",
+    "order_date": "2026-09-01",
+    "order_status": "delivered",
+    "delivery_date": "2026-09-06",
+    "shipping_country": "FR",
+    "shipping_cost_eur": 4.9,
+    "payment_last4": "2048",
+    "channel": "web",
+    "notes": [],
+    "items": [
+      {
+        "sku": "BK-9780140449082",
+        "title": "The Histories",
+        "author": "Herodotus",
+        "qty": 1,
+        "price_eur": 21.3
+      }
+    ],
+    "subtotal_eur": 21.3
+  },
+  "ORD-4390": {
+    "order_id": "ORD-4390",
+    "customer_id": "CUST-1006",
+    "order_date": "2026-07-14",
+    "order_status": "delivered",
+    "delivery_date": "2026-07-20",
+    "shipping_country": "FR",
+    "shipping_cost_eur": 0.0,
+    "payment_last4": "2048",
+    "channel": "web",
+    "notes": [
+      "emballage cadeau demandé"
+    ],
+    "items": [
+      {
+        "sku": "BK-9780140440393",
+        "title": "The Peloponnesian War",
+        "author": "Thucydides",
+        "qty": 1,
+        "price_eur": 24.5
+      },
+      {
+        "sku": "BK-9780195014761",
+        "title": "The Art of War",
+        "author": "Sun Tzu",
+        "qty": 1,
+        "price_eur": 12.9
+      },
+      {
+        "sku": "BK-9780679783268",
+        "title": "Pride and Prejudice",
+        "author": "Jane Austen",
+        "qty": 1,
+        "price_eur": 10.9
+      }
+    ],
+    "subtotal_eur": 48.3
+  },
+  "ORD-4530": {
+    "order_id": "ORD-4530",
+    "customer_id": "CUST-1006",
+    "order_date": "2026-09-07",
+    "order_status": "processing",
+    "delivery_date": null,
+    "shipping_country": "FR",
+    "shipping_cost_eur": 0.0,
+    "payment_last4": "2048",
+    "channel": "app",
+    "notes": [],
+    "items": [
+      {
+        "sku": "BK-9780521546577",
+        "title": "Supplying War",
+        "author": "Martin van Creveld",
+        "qty": 1,
+        "price_eur": 34.2
+      }
+    ],
+    "subtotal_eur": 34.2
+  },
+  "ORD-4520": {
+    "order_id": "ORD-4520",
+    "customer_id": "CUST-1007",
+    "order_date": "2026-09-06",
+    "order_status": "processing",
+    "delivery_date": null,
+    "shipping_country": "FR",
+    "shipping_cost_eur": 0.0,
+    "payment_last4": "6612",
+    "channel": "web",
+    "notes": [],
+    "items": [
+      {
+        "sku": "BK-9780691018546",
+        "title": "On War",
+        "author": "Carl von Clausewitz",
+        "qty": 1,
+        "price_eur": 32.0
+      }
+    ],
+    "subtotal_eur": 32.0
+  },
+  "ORD-4444": {
+    "order_id": "ORD-4444",
+    "customer_id": "CUST-1007",
+    "order_date": "2026-08-05",
+    "order_status": "delivered",
+    "delivery_date": "2026-08-12",
+    "shipping_country": "FR",
+    "shipping_cost_eur": 0.0,
+    "payment_last4": "6612",
+    "channel": "web",
+    "notes": [],
+    "items": [
+      {
+        "sku": "BK-9780156013987",
+        "title": "The Little Prince",
+        "author": "Antoine de Saint-Exupery",
+        "qty": 2,
+        "price_eur": 9.8
+      },
+      {
+        "sku": "BK-9780140449334",
+        "title": "Meditations",
+        "author": "Marcus Aurelius",
+        "qty": 1,
+        "price_eur": 11.5
+      }
+    ],
+    "subtotal_eur": 31.1
+  },
+  "ORD-4361": {
+    "order_id": "ORD-4361",
+    "customer_id": "CUST-1007",
+    "order_date": "2026-06-22",
+    "order_status": "delivered",
+    "delivery_date": "2026-06-28",
+    "shipping_country": "FR",
+    "shipping_cost_eur": 4.9,
+    "payment_last4": "6612",
+    "channel": "app",
+    "notes": [],
+    "items": [
+      {
+        "sku": "BK-9780241951804",
+        "title": "Wolf Hall",
+        "author": "Hilary Mantel",
+        "qty": 1,
+        "price_eur": 14.6
+      }
+    ],
+    "subtotal_eur": 14.6
+  },
+  "ORD-4278": {
+    "order_id": "ORD-4278",
+    "customer_id": "CUST-1004",
+    "order_date": "2026-03-28",
+    "order_status": "delivered",
+    "delivery_date": "2026-04-04",
+    "shipping_country": "BE",
+    "shipping_cost_eur": 5.9,
+    "payment_last4": "3306",
+    "channel": "web",
+    "notes": [],
+    "items": [
+      {
+        "sku": "BK-9780061120084",
+        "title": "To Kill a Mockingbird",
+        "author": "Harper Lee",
+        "qty": 1,
+        "price_eur": 13.2
+      }
+    ],
+    "subtotal_eur": 13.2
+  },
+  "ORD-4199": {
+    "order_id": "ORD-4199",
+    "customer_id": "CUST-1001",
+    "order_date": "2026-01-19",
+    "order_status": "delivered",
+    "delivery_date": "2026-01-26",
+    "shipping_country": "FR",
+    "shipping_cost_eur": 4.9,
+    "payment_last4": "4417",
+    "channel": "web",
+    "notes": [],
+    "items": [
+      {
+        "sku": "BK-9780679783268",
+        "title": "Pride and Prejudice",
+        "author": "Jane Austen",
+        "qty": 1,
+        "price_eur": 10.9
+      }
+    ],
+    "subtotal_eur": 10.9
+  }
+}

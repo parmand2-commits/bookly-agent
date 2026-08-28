@@ -1,0 +1,44 @@
+{
+  "CUST-1001": {
+    "customer_id": "CUST-1001",
+    "name": "Claire Fontaine",
+    "email": "claire.fontaine@example.com",
+    "customer_since": "2024-03-12"
+  },
+  "CUST-1002": {
+    "customer_id": "CUST-1002",
+    "name": "Marcus Webb",
+    "email": "m.webb@example.com",
+    "customer_since": "2023-11-04"
+  },
+  "CUST-1003": {
+    "customer_id": "CUST-1003",
+    "name": "Aisha Rahman",
+    "email": "a.rahman@example.com",
+    "customer_since": "2025-06-19"
+  },
+  "CUST-1004": {
+    "customer_id": "CUST-1004",
+    "name": "Tomas Neves",
+    "email": "t.neves@example.com",
+    "customer_since": "2024-09-30"
+  },
+  "CUST-1005": {
+    "customer_id": "CUST-1005",
+    "name": "Lena Brandt",
+    "email": "l.brandt@example.com",
+    "customer_since": "2022-01-15"
+  },
+  "CUST-1006": {
+    "customer_id": "CUST-1006",
+    "name": "Sofia Ricci",
+    "email": "s.ricci@example.com",
+    "customer_since": "2025-02-08"
+  },
+  "CUST-1007": {
+    "customer_id": "CUST-1007",
+    "name": "Daniel Okoro",
+    "email": "d.okoro@example.com",
+    "customer_since": "2026-01-22"
+  }
+}
