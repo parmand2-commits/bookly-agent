@@ -1,0 +1,15 @@
+﻿ticket_id;customer_id;order_id;opened_at;closed_at;channel;category;summary;resolution
+TIC-0198;CUST-1002;ORD-4222;2026-03-24;2026-03-25;chat;shipping;Asked when the second book would arrive;resolved
+TIC-0231;CUST-1002;ORD-4310;2026-06-12;2026-06-14;email;return;Wanted to return the book after reading part of it;escalated
+TIC-0244;CUST-1001;ORD-4350;2026-06-19;2026-06-19;chat;shipping;Confirmed delivery address before dispatch;resolved
+TIC-0256;CUST-1003;ORD-4300;2026-05-13;2026-05-15;email;shipping;Delivery later than the estimate for Belgium;resolved
+TIC-0261;CUST-1005;ORD-4288;2026-04-20;2026-04-20;chat;other;Asked for an invoice copy;resolved
+TIC-0273;CUST-1006;ORD-4390;2026-07-22;;email;return;Gift wrap was missing from the parcel;abandoned
+TIC-0288;CUST-1004;ORD-4415;2026-08-09;2026-08-10;chat;account;Password reset link not received;resolved
+TIC-0295;CUST-1007;ORD-4444;2026-08-14;2026-08-14;chat;shipping;Asked to track the parcel;resolved
+TIC-0301;CUST-1003;ORD-4455;2026-09-02;;chat;shipping;Parcel not moving for several days;escalated
+TIC-0309;CUST-1005;;2026-08-27;2026-08-28;email;account;Requested a copy of stored personal data;resolved
+TIC-0314;CUST-1001;ORD-4199;2026-01-28;2026-01-29;chat;return;Wrong edition received;resolved
+TIC-0320;CUST-1006;;2026-09-04;2026-09-04;chat;other;Asked whether gift cards can be refunded;resolved
+TIC-0325;CUST-1004;ORD-4278;2026-04-06;2026-04-07;email;shipping;Parcel left with a neighbour;resolved
+TIC-0331;CUST-1007;;2026-09-06;;chat;other;Asked about a price seen on another site;escalated

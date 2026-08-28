@@ -1,0 +1,33 @@
+intent: return_request
+description: Customer wants to return a book they already received.
+
+# "which tools are reachable"
+tools_allowed: [lookup_order, create_return, search_policies]
+
+# "the agent must stop and collect before acting"
+required_info:
+  - order_id
+  - item_sku
+  - reason
+
+steps:
+  - Identify the order and confirm it belongs to this customer
+  - If the order has more than one item, ask which one is being returned
+  - Check the delivery date against the return window in returns_window
+  - Summarise the return and get explicit confirmation before creating it
+  - Create the return and give the customer the RMA number
+
+# "what the agent may never promise"
+never:
+  - State a refund timeline that is not in refund_timing
+  - Grant an exception to the return window
+  - Create a return without explicit customer confirmation
+
+# "refusing is a designed outcome"
+escalate_if:
+  - delivery date is outside the return window
+  - customer reports a damaged or wrong item
+  - order cannot be identified after one clarification attempt
+  - no policy document is retrieved above the confidence threshold
+
+policy_refs: [returns_window, returns_process, refund_timing, damaged_or_wrong_item]

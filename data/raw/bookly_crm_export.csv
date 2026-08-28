@@ -1,0 +1,34 @@
+﻿record_id;customer_id;customer_name;customer_email;customer_since;order_id;order_date;order_status;delivery_date;item_sku;item_title;item_author;item_qty;item_price_eur;shipping_country;shipping_cost_eur;payment_last4;channel;notes
+R-00101;CUST-1001;Claire Fontaine;claire.fontaine@example.com;2024-03-12;ORD-4471;2026-09-03;In Transit;;BK-9780691018546;On War;Carl von Clausewitz;1;32.00;FR;0.00;4417;web;
+R-00102;CUST-1001;Claire Fontaine;claire.fontaine@example.com;2024-03-12;ORD-4488;07/09/2026;processing;;BK-9780140449334;Meditations;Marcus Aurelius;1;11.50;FR;4.90;4417;app;
+R-00103;CUST-1001;Claire Fontaine;claire.fontaine@example.com;2024-03-12;ORD-4488;07/09/2026;processing;;BK-9780140440072;Anabasis;Xenophon;1;18.75;FR;0.00;4417;app;cliente a demandé si les 2 arrivent ensemble
+R-00104;CUST-1001;Claire Fontaine;claire.fontaine@example.com;2024-03-12;ORD-4350;2026-06-10;DELIVERED;2026-06-17;BK-9780140044300;The Face of Battle;John Keegan;1;16.40;FR;4.90;4417;web;
+R-00105;CUST-1002;Marcus Webb;m.webb@example.com;2023-11-04;ORD-4402;2026-08-28;Delivered;2026-09-03;BK-9780140449334;Meditations;Marcus Aurelius;1;11.50;FR;0.00;8823;web;
+R-00106;CUST-1002;Marcus Webb;m.webb@example.com;2023-11-04;ORD-4402;2026-08-28;Delivered;2026-09-03;BK-9780140449150;The Prince;Niccolo Machiavelli;1;10.20;FR;0.00;8823;web;
+R-00107;CUST-1002;Marcus Webb;m.webb@example.com;2023-11-04;ORD-4310;2026-05-30;DELIVERED;2026-06-05;BK-9780199325153;Strategy: A History;Lawrence Freedman;1;26.80;FR;0.00;8823;web;client rappelle en aout au sujet de ce livre
+R-00108;CUST-1002;Marcus Webb;m.webb@example.com;2023-11-04;ORD-4222;2026-03-15;delivered;2026-03-22;BK-9780140440393;The Peloponnesian War;Thucydides;1;24.50;FR;0.00;8823;web;
+R-00109;CUST-1002;Marcus Webb;m.webb@example.com;2023-11-04;ORD-4222;2026-03-15;delivered;2026-03-22;BK-9780226500362;Discourses on Livy;Niccolo Machiavelli;1;28.40;FR;0.00;8823;web;
+R-00110;CUST-1003;Aisha Rahman;a.rahman@example.com;2025-06-19;ORD-4455;2026-08-22;shipped;;BK-9780521546577;Supplying War;Martin van Creveld;1;34.20;BE;0.00;1194;web;retard signalé par le transporteur
+R-00111;CUST-1003;Aisha Rahman;a.rahman@example.com;2025-06-19;ORD-4455;2026-08-22;shipped;;BK-9780195014761;The Art of War;Sun Tzu;2;12.90;BE;0.00;1194;web;
+R-00112;CUST-1003;Aisha Rahman;a.rahman@example.com;2025-06-19;ORD-4460;2026-08-30;Cancelled;;BK-9780140449082;The Histories;Herodotus;1;21.30;BE;5.90;1194;app;annulé par la cliente avant expédition
+R-00113;CUST-1003;Aisha Rahman;a.rahman@example.com;2025-06-19;ORD-4300;2026-05-02;delivered;2026-05-11;BK-9780241951804;Wolf Hall;Hilary Mantel;1;14.60;BE;5.90;1194;web;
+R-00114;CUST-1004;Tomas Neves;t.neves@example.com;2024-09-30;ORD-4501;15/08/2026;Delivered;2026-08-19;BK-9780025236608;The Campaigns of Napoleon;David Chandler;1;45.00;BE;0.00;3306;web;
+R-00115;CUST-1004;Tomas Neves;t.neves@example.com;2024-09-30;ORD-4415;2026-08-01;delivered;2026-08-08;BK-9780156013987;The Little Prince;Antoine de Saint-Exupery;1;9.80;BE;5.90;3306;app;
+R-00116;CUST-1004;Tomas Neves;t.neves@example.com;2024-09-30;ORD-4415;2026-08-01;delivered;2026-08-08;BK-9780140449334;Meditations;Marcus Aurelius;1;11.50;BE;0.00;3306;app;
+R-00117;CUST-1005;Lena Brandt;l.brandt@example.com;2022-01-15;ORD-4288;2026-04-11;Delivered;2026-04-18;BK-9780140440072;Anabasis;Xenophon;1;18.75;DE;0.00;7751;web;
+R-00118;CUST-1005;Lena Brandt;l.brandt@example.com;2022-01-15;ORD-4288;2026-04-11;Delivered;2026-04-18;BK-9780061120084;To Kill a Mockingbird;Harper Lee;1;13.20;DE;0.00;7751;web;
+R-00119;CUST-1005;Lena Brandt;l.brandt@example.com;2022-01-15;ORD-4512;2026-09-05;in_transit;;BK-9780199325153;Strategy: A History;Lawrence Freedman;1;26.80;DE;0.00;7751;web;
+R-00120;CUST-1005;Lena Brandt;l.brandt@example.com;2022-01-15;ORD-4201;2026-02-03;delivered;2026-02-10;BK-9780140449150;The Prince;Niccolo Machiavelli;1;10.20;DE;6.50;7751;app;
+R-00121;CUST-1006;Sofia Ricci;s.ricci@example.com;2025-02-08;ORD-4477;2026-09-01;Delivered;2026-09-06;BK-9780140449082;The Histories;Herodotus;1;21.30;FR;4.90;2048;web;
+R-00122;CUST-1006;Sofia Ricci;s.ricci@example.com;2025-02-08;ORD-4390;2026-07-14;delivered;2026-07-20;BK-9780140440393;The Peloponnesian War;Thucydides;1;24.50;FR;0.00;2048;web;
+R-00123;CUST-1006;Sofia Ricci;s.ricci@example.com;2025-02-08;ORD-4390;2026-07-14;delivered;2026-07-20;BK-9780195014761;The Art of War;Sun Tzu;1;12.90;FR;0.00;2048;web;
+R-00124;CUST-1006;Sofia Ricci;s.ricci@example.com;2025-02-08;ORD-4390;2026-07-14;delivered;2026-07-20;BK-9780679783268;Pride and Prejudice;Jane Austen;1;10.90;FR;0.00;2048;web;emballage cadeau demandé
+R-00125;CUST-1006;Sofia Ricci;s.ricci@example.com;2025-02-08;ORD-4530;2026-09-07;processing;;BK-9780521546577;Supplying War;Martin van Creveld;1;34.20;FR;0.00;2048;app;
+R-00126;CUST-1007;Daniel Okoro;d.okoro@example.com;2026-01-22;ORD-4520;06/09/2026;Processing;;BK-9780691018546;On War;Carl von Clausewitz;1;32.00;FR;0.00;6612;web;
+R-00127;CUST-1007;Daniel Okoro;d.okoro@example.com;2026-01-22;ORD-4444;2026-08-05;delivered;2026-08-12;BK-9780156013987;The Little Prince;Antoine de Saint-Exupery;2;9.80;FR;0.00;6612;web;
+R-00128;CUST-1007;Daniel Okoro;d.okoro@example.com;2026-01-22;ORD-4444;2026-08-05;delivered;2026-08-12;BK-9780140449334;Meditations;Marcus Aurelius;1;11.50;FR;0.00;6612;web;
+R-00129;CUST-1007;Daniel Okoro;d.okoro@example.com;2026-01-22;ORD-4361;2026-06-22;DELIVERED;2026-06-28;BK-9780241951804;Wolf Hall;Hilary Mantel;1;14.60;FR;4.90;6612;app;
+R-00130;CUST-1004;Tomas Neves;t.neves@example.com;2024-09-30;ORD-4278;2026-03-28;delivered;2026-04-04;BK-9780061120084;To Kill a Mockingbird;Harper Lee;1;13.20;BE;5.90;3306;web;
+R-00131;CUST-1001;Claire Fontaine;claire.fontaine@example.com;2024-03-12;ORD-4199;2026-01-19;delivered;2026-01-26;BK-9780679783268;Pride and Prejudice;Jane Austen;1;10.90;FR;4.90;4417;web;
+R-00132;;Unknown Customer;noreply@example.com;;ORD-4499;2026-08-18;delivered;2026-08-25;BK-9780140440393;The Peloponnesian War;Thucydides;1;24.50;FR;4.90;0;web;import partiel depuis l ancien systeme
+R-00133;CUST-1005;Lena Brandt;l.brandt@example.com;2022-01-15;ORD-4333;2026-07-20;delivered;2026-07-02;BK-9780226500362;Discourses on Livy;Niccolo Machiavelli;1;28.40;DE;0.00;7751;web;dates incoherentes suite migration

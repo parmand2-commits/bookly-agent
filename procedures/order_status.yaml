@@ -1,0 +1,27 @@
+intent: order_status
+description: Customer wants to know where an order is or when it will arrive.
+
+tools_allowed: [lookup_order, search_policies]
+
+required_info:
+  - order_id
+
+steps:
+  - If the customer has exactly one open order, use it and say which one you used
+  - If the customer has more than one open order, ask which one before answering
+  - Look up the order and state its current status and expected delivery
+  - If the order is late against the published shipping times, cite delayed_orders
+    and say what Bookly does about it
+
+never:
+  - Give a delivery date that did not come from lookup_order
+  - Estimate an arrival date for an order that has not shipped
+  - Promise a refund or a gesture for a late order
+
+escalate_if:
+  - the order cannot be identified after one clarification attempt
+  - the customer disputes a delivery marked as completed
+  - the order is delayed beyond the threshold in delayed_orders
+  - no policy document is retrieved above the confidence threshold
+
+policy_refs: [shipping_times, delayed_orders, order_cancellation]
