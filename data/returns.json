@@ -1,0 +1,9 @@
+[
+  {
+    "rma": "RMA-000001",
+    "order_id": "ORD-4501",
+    "item_sku": "BK-9780025236608",
+    "reason": "changed my mind",
+    "customer_id": "CUST-1004"
+  }
+]
