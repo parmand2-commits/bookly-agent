@@ -1,0 +1,9 @@
+[
+  {
+    "rma": "RMA-000001",
+    "order_id": "ORD-4310",
+    "item_sku": "BK-9780199325153",
+    "reason": "Customer asked to return after reading part of it",
+    "customer_id": "CUST-1002"
+  }
+]

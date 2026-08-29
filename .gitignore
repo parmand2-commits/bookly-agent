@@ -1,6 +1,8 @@
 .env
 __pycache__/
 *.pyc
+.venv/
 .DS_Store
 *.log
-.venv/
+data/returns.seed.json
+.claude/
