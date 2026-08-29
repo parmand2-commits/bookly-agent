@@ -21,3 +21,14 @@ Behaviour lives in declarative YAML, not in the system prompt.
 
 \#\# Style  
 \- Explicit over clever. This code will be read aloud in an interview.  
+
+\#\# Architecture decisions already made. Do not revisit.
+\- TWO model calls per turn: classify, then reason. Never merge them.
+  The classification determines which tools are exposed. Merging
+  destroys the structural guardrail.
+\- No agent framework. No pytest. No pandas.
+\- The log schema is frozen. Do not add fields.
+\- `confirmed` flips to True only on an explicit user affirmation,
+  never inferred from tone or context.
+\- If you believe one of these is wrong, say so and stop. Do not
+  implement your preferred alternative.
