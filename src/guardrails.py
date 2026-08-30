@@ -40,6 +40,21 @@ def _has_unsupported_policy_claim(text):
 # Order/customer identifiers, e.g. ORD-4471, CUST-1001.
 _IDENTIFIER_RE = re.compile(r"\b(ORD|CUST)-\d+\b")
 
+# Language claiming an escalation/hand-off happened -- the same shape of problem as an unsupported
+# policy claim: the reply asserts something the system did not actually do. "escalat\w*" alone
+# covers escalate/escalating/escalated/escalation, which is the exact word the real failure used
+# ("Your escalation has already been submitted").
+_ESCALATION_CLAIM_RE = re.compile(
+    r"\bescalat\w*|connect(?:ing)? you with|human agent|human support|"
+    r"flag this for|pass this to a colleague|someone will get back",
+    re.IGNORECASE,
+)
+
+
+def _claims_escalation(text):
+    """True if text uses language claiming an escalation or human hand-off (e.g. "I'll escalate this")."""
+    return bool(_ESCALATION_CLAIM_RE.search(text))
+
 
 def wrap_policy(text):
     """Wrap retrieved policy text in explicit delimiters so the system prompt can mark it as data, not instructions."""
@@ -51,12 +66,21 @@ def wrap_user_message(text):
     return f"{USER_OPEN}\n{text}\n{USER_CLOSE}"
 
 
-def check_output(text, retrieval_results, procedure, allowed_ids=None):
-    """Return a list of violation strings for text: unsupported policy claims, and (if allowed_ids given) stray identifiers."""
+def check_output(text, retrieval_results, procedure, allowed_ids=None, escalation_confirmed=False):
+    """Return a list of violation strings for text: unsupported policy claims, escalation language
+    with no escalation behind it, and (if allowed_ids given) stray identifiers.
+
+    escalation_confirmed=True means a valid <<ESCALATE>> marker was already found in this same
+    reply -- pass True there so escalation language consistent with a real escalation isn't
+    flagged. Default False so a caller that doesn't pass it gets the check enforced, not skipped.
+    """
     violations = []
 
     if _has_unsupported_policy_claim(text) and not retrieval.is_confident(retrieval_results):
         violations.append("policy-shaped claim made with no confident retrieval behind it")
+
+    if _claims_escalation(text) and not escalation_confirmed:
+        violations.append("reply claims an escalation was made, but no escalation was triggered")
 
     # allowed_ids is optional because check_output's own signature carries no session reference;
     # agent.py passes the current customer's own order/customer ids when it wants this check enforced.
