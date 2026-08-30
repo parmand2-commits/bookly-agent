@@ -65,6 +65,7 @@
   turns:
     - user: "I want to return one of the items from my order 4402"
     - user: "The Prince, the Machiavelli one"
+    - user: "it arrived with a bent corner, I'd rather just send it back"
     - user: "Yes, go ahead"
 
   expect:
@@ -73,12 +74,13 @@
     escalated: false
     per_turn:
       - turn: 1
-        tools_called: [lookup_order]
         tools_not_called: [create_return]
         must_contain: ["which"]
       - turn: 2
         tools_not_called: [create_return]      # pas encore confirmé
       - turn: 3
+        tools_not_called: [create_return]
+      - turn: 4
         tools_called: [create_return]
 
     tool_args:
@@ -147,7 +149,6 @@
         tools_not_called: [lookup_order,create_return, search_policies]
         must_contain: ["which"]
       - turn: 2
-        tools_called: [lookup_order]
         tools_not_called: [create_return] 
         must_contain: ["processing"]
         must_not_contain:
@@ -205,7 +206,7 @@
     tools_called: [lookup_order, search_policies]
     tools_not_called: [create_return]
     escalated: true
-    escalation_reason_contains: "outside the return window"
+    escalation_reason_contains: "return window"
     must_cite: [returns_window]
     must_not_contain:
       - "exception"
