@@ -60,6 +60,29 @@ def _init_state(state):
     return state
 
 
+def _pending_confirmation(state):
+    """True if state, as carried into this turn, is mid-way through the create_return confirmation
+    dance for its currently loaded procedure -- computed before (re)classifying the message.
+
+    An affirmation like "yes, go ahead" has no content a classifier can key off of; reclassifying
+    it risks flipping intent to "none", which trips the intent-change reset and drops the very
+    confirmation this message is trying to give.
+    """
+    intent = state["intent"]
+    if not intent or intent == "none":
+        return False
+    try:
+        procedure = procedures.load_procedure(intent)
+    except ValueError:
+        return False
+    if "create_return" not in procedure.get("tools_allowed", []):
+        return False
+    if state["confirmed"]:
+        return False
+    required_info = procedure.get("required_info", [])
+    return all(key in state["collected"] for key in required_info)
+
+
 def _is_explicit_affirmation(message):
     """True if message contains one of a fixed allowlist of affirmation phrases, matched case-insensitively as whole words."""
     normalized = _NON_ALNUM_RE.sub(" ", message.lower())
@@ -158,6 +181,11 @@ def _build_system_prompt(session, procedure, state, tools_allowed):
     )
 
     if "search_policies" in tools_allowed:
+        lines.append(
+            "Only call search_policies when answering the customer actually requires a policy "
+            "lookup. If a tool result you already have (e.g. an order's status) answers the "
+            "question on its own, reply from it directly -- do not search as a precaution."
+        )
         # Retrieval is plain keyword matching (no embeddings), scored against short customer-style
         # phrasings. A long, descriptive query dilutes the score against the right document.
         lines.append(
@@ -406,7 +434,10 @@ def run_turn(message, session, state, conversation_id, turn):
     customer_id = session["customer"]["customer_id"]
     prior_intent = state["intent"]
 
-    intent, classify_usage, classify_error = _classify_raw(message, session)
+    if _pending_confirmation(state):
+        intent, classify_usage, classify_error = state["intent"], {"input": 0, "output": 0}, None
+    else:
+        intent, classify_usage, classify_error = _classify_raw(message, session)
 
     if classify_error is not None:
         reply = (
