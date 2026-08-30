@@ -308,7 +308,12 @@ def _run_reasoning_loop(message, session, procedure, tools_allowed, state, custo
         tool_results = []
         for block in tool_use_blocks:
             ok, result = _dispatch_tool(block.name, block.input, customer_id, state)
-            tools_called.append({"name": block.name, "ok": ok})
+            tools_called.append({
+                "name": block.name,
+                "ok": ok,
+                "error": result.get("error") if not ok else None,
+                "input": block.input,
+            })
             if block.name == "search_policies" and isinstance(result, list):
                 query = block.input.get("query")
                 retrieval_records.extend(
