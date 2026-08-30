@@ -65,7 +65,7 @@
   turns:
     - user: "I want to return one of the items from my order 4402"
     - user: "The Prince, the Machiavelli one"
-    - user: "it arrived with a bent corner, I'd rather just send it back"
+    - user: "I just changed my mind about it, I already have a copy"
     - user: "Yes, go ahead"
 
   expect:
