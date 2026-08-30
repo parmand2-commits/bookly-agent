@@ -350,6 +350,7 @@ def run_turn(message, session, state, conversation_id, turn):
     tools_called = []
     retrieval_records = []
     escalation_reason = None
+    escalation_triggers = []
     rejected_escalation_proposal = None
 
     if session.get("customer") is None:
@@ -370,6 +371,7 @@ def run_turn(message, session, state, conversation_id, turn):
             "cost_usd": 0.0,
             "escalated": True,
             "escalation_reason": "unknown customer_id",
+            "escalation_triggers": ["unknown_customer"],
             "rejected_escalation_proposal": None,
         }
         turn_log.log_turn(record)
@@ -397,6 +399,7 @@ def run_turn(message, session, state, conversation_id, turn):
         )
         escalated = True
         escalation_reason = f"classification call failed: {classify_error}"
+        escalation_triggers = ["classification_failed"]
         tokens_in, tokens_out = classify_usage["input"], classify_usage["output"]
         cost = _cost_usd(config.CLASSIFIER_MODEL, tokens_in, tokens_out)
         procedure_name = state["procedure"]
@@ -448,6 +451,7 @@ def run_turn(message, session, state, conversation_id, turn):
             )
             escalated = True
             escalation_reason = f"reasoning call failed: {loop_result['network_error']}"
+            escalation_triggers = ["reasoning_call_failed"]
         else:
             clean_text, proposed_matches, proposed_reason = _extract_escalation_marker(loop_result["reply_raw"])
             reply = clean_text
@@ -460,17 +464,6 @@ def run_turn(message, session, state, conversation_id, turn):
             searched = any(tc["name"] == "search_policies" for tc in tools_called)
             not_confident = searched and not retrieval.is_confident(loop_result["last_search_results"])
 
-            hard_escalate, hard_reason = False, None
-            if not_confident:
-                hard_escalate, hard_reason = True, "no policy document was retrieved above the confidence threshold"
-            elif loop_result["exhausted"]:
-                hard_escalate, hard_reason = True, "maximum tool turns reached without producing a response"
-            elif state["clarification_count"] >= config.MAX_CLARIFICATIONS:
-                hard_escalate, hard_reason = (
-                    True,
-                    "maximum clarification attempts reached without resolving required information",
-                )
-
             allowed_ids = (
                 loop_result["verified_order_ids"]
                 | {o["order_id"] for o in session["open_orders"]}
@@ -482,23 +475,49 @@ def run_turn(message, session, state, conversation_id, turn):
             # check_output conflates two violation kinds in one list. Only a cross-customer identifier
             # leak is an actual leak, so only that kind blanks the reply. An unsupported policy claim
             # still escalates, but the model's own reply is left intact -- there is nothing to hide.
-            # Either way, a hard trigger that already fired above keeps its reason.
             leak_violations = [v for v in violations if "belonging to this customer" in v]
             claim_violations = [v for v in violations if "belonging to this customer" not in v]
             if leak_violations:
-                hard_escalate = True
-                hard_reason = hard_reason or f"output guardrail violation: {leak_violations[0]}"
                 reply = "I'm sorry, I'm not able to share that here -- connecting you with a member of our team."
-            elif claim_violations:
-                hard_escalate = True
-                hard_reason = hard_reason or f"output guardrail violation: {claim_violations[0]}"
 
-            if hard_escalate:
-                escalated, escalation_reason = True, hard_reason
-            elif proposal_valid:
-                escalated, escalation_reason = True, (proposed_reason or proposed_matches)
-            else:
-                escalated, escalation_reason = False, None
+            # Every trigger is evaluated independently, in this fixed order, so escalation_triggers
+            # captures everything that fired this turn -- not just whichever one is chosen as the
+            # human-facing reason below.
+            triggers = []  # (name, reason) pairs, in evaluation order
+            if not_confident:
+                triggers.append(("not_confident", "no policy document was retrieved above the confidence threshold"))
+            if loop_result["exhausted"]:
+                triggers.append(("tool_turns_exhausted", "maximum tool turns reached without producing a response"))
+            if state["clarification_count"] >= config.MAX_CLARIFICATIONS:
+                triggers.append((
+                    "clarification_cap",
+                    "maximum clarification attempts reached without resolving required information",
+                ))
+            if leak_violations:
+                triggers.append(("guardrail_leak", f"output guardrail violation: {leak_violations[0]}"))
+            if claim_violations:
+                triggers.append(("guardrail_claim", f"output guardrail violation: {claim_violations[0]}"))
+            if proposal_valid:
+                triggers.append(("model_proposed", proposed_reason or proposed_matches))
+
+            escalation_triggers = [name for name, _ in triggers]
+            escalated = bool(triggers)
+
+            # Reason priority: the three system-health triggers (tool-turn exhaustion, the
+            # clarification cap, an output guardrail violation) describe the system, not the
+            # customer's case, and always win -- never masked by a model proposal. A validated
+            # proposal outranks not_confident specifically: "outside the return window" is a
+            # sentence an operator can act on, "below the confidence threshold" is not. Both still
+            # escalate either way; this only changes which reason the human sees.
+            reason_by_trigger = dict(triggers)
+            escalation_reason = (
+                reason_by_trigger.get("tool_turns_exhausted")
+                or reason_by_trigger.get("clarification_cap")
+                or reason_by_trigger.get("guardrail_leak")
+                or reason_by_trigger.get("guardrail_claim")
+                or reason_by_trigger.get("model_proposed")
+                or reason_by_trigger.get("not_confident")
+            )
 
     record = {
         "conversation_id": conversation_id,
@@ -516,6 +535,7 @@ def run_turn(message, session, state, conversation_id, turn):
         "cost_usd": cost,
         "escalated": escalated,
         "escalation_reason": escalation_reason,
+        "escalation_triggers": escalation_triggers,
         "rejected_escalation_proposal": rejected_escalation_proposal,
     }
     turn_log.log_turn(record)

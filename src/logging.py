@@ -9,7 +9,8 @@ TURNS_PATH = config.LOGS_DIR / "turns.jsonl"
 ESCALATIONS_PATH = config.LOGS_DIR / "escalations.log"
 
 # Frozen turn schema. Do not add fields here without an explicit instruction to do so --
-# rejected_escalation_proposal was added on one such instruction, not as drift.
+# rejected_escalation_proposal and escalation_triggers were each added on one such instruction,
+# not as drift.
 TURN_FIELDS = {
     "conversation_id",
     "turn",
@@ -26,6 +27,7 @@ TURN_FIELDS = {
     "cost_usd",
     "escalated",
     "escalation_reason",
+    "escalation_triggers",
     "rejected_escalation_proposal",
 }
 
