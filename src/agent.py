@@ -40,6 +40,16 @@ _STATE_DEFAULTS = {
     "tool_turns": 0,
     "awaiting_confirmation": False,  # last assistant reply ended with <<AWAITING_CONFIRMATION>>
     "messages": [],  # the reasoning call's conversation history, carried across turns
+    # Orders lookup_order/create_return have already verified belong to this customer, carried
+    # across turns for the same reason messages is: the output guardrail's allowed_ids check was
+    # written when the model had no memory and could only ever mention an order it had just looked
+    # up that same turn. Conversation history invalidated that assumption -- the model can now
+    # recall an order named several turns ago on a turn that calls no tool at all. The security
+    # property is unchanged: an id only ever enters this set via the ok==True branch below, after
+    # tools.py's own per-customer authorization check has already approved it -- nothing else
+    # writes to it, so persisting it doesn't relax the check, it just lets the check remember what
+    # it already verified instead of forgetting it every turn.
+    "verified_order_ids": set(),
 }
 
 MAX_HISTORY_MESSAGES = 20  # cap on state["messages"]; see the trim at the end of _run_reasoning_loop
@@ -62,17 +72,20 @@ _AWAITING_CONFIRMATION_RE = re.compile(r"<<\s*AWAITING_CONFIRMATION\s*>>", re.IG
 def _init_state(state):
     """Fill in any missing keys of the task-state dict with their defaults, in place.
 
-    dict/list defaults are copied per call -- do not simplify this back to
+    dict/list/set defaults are copied per call -- do not simplify this back to
     `default if isinstance(default, dict) else default`. _STATE_DEFAULTS holds exactly one
-    "collected" dict and one "messages" list for the whole process; without copying, every
-    conversation's state would setdefault to those same shared objects, so one customer's tool
-    args or conversation history would leak into every other customer's prompt.
+    "collected" dict, one "messages" list, and one "verified_order_ids" set for the whole process;
+    without copying, every conversation's state would setdefault to those same shared objects, so
+    one customer's tool args, conversation history, or verified orders would leak into every other
+    customer's prompt.
     """
     for key, default in _STATE_DEFAULTS.items():
         if isinstance(default, dict):
             state.setdefault(key, dict(default))
         elif isinstance(default, list):
             state.setdefault(key, list(default))
+        elif isinstance(default, set):
+            state.setdefault(key, set(default))
         else:
             state.setdefault(key, default)
     return state
@@ -373,7 +386,6 @@ def _run_reasoning_loop(message, session, procedure, tools_allowed, state, custo
     retrieval_records = []
     best_search_results = []
     best_search_top_score = -1.0  # -1 so even a single empty/zero-score search call is recorded once
-    verified_order_ids = set()
     tokens_in = tokens_out = 0
     final_text = None
     network_error = None
@@ -425,7 +437,7 @@ def _run_reasoning_loop(message, session, procedure, tools_allowed, state, custo
             if block.name in ("lookup_order", "create_return") and ok:
                 order_id = block.input.get("order_id")
                 if order_id:
-                    verified_order_ids.add(order_id)
+                    state["verified_order_ids"].add(order_id)
             tool_results.append(
                 {
                     "type": "tool_result",
@@ -449,7 +461,6 @@ def _run_reasoning_loop(message, session, procedure, tools_allowed, state, custo
         "tools_called": tools_called,
         "retrieval": retrieval_records,
         "best_search_results": best_search_results,
-        "verified_order_ids": verified_order_ids,
         "tokens_in": tokens_in,
         "tokens_out": tokens_out,
         "exhausted": exhausted,
@@ -588,7 +599,7 @@ def run_turn(message, session, state, conversation_id, turn):
             not_confident = searched and not retrieval.is_confident(loop_result["best_search_results"])
 
             allowed_ids = (
-                loop_result["verified_order_ids"]
+                state["verified_order_ids"]
                 | {o["order_id"] for o in session["open_orders"]}
                 | {customer_id}
             )
