@@ -57,6 +57,26 @@ def _claims_escalation(text):
     return bool(_ESCALATION_CLAIM_RE.search(text))
 
 
+# Language asking the customer to confirm before an action is taken -- same class of detection as
+# _ESCALATION_CLAIM_RE above, but the repair on a miss is different (see agent.py's call site):
+# asking for confirmation without the marker is a structural omission, not a false statement to
+# the customer, so it corrects state rather than raising a violation.
+_CONFIRMATION_REQUEST_RE = re.compile(
+    r"\bconfirm\w*\b|shall i proceed|would you like me to|is that correct|should i go ahead|"
+    r"ready to proceed",
+    re.IGNORECASE,
+)
+
+
+def asks_for_confirmation(text):
+    """True if text asks the customer to confirm before an action is taken (e.g. "shall I proceed?").
+
+    Public, unlike _claims_escalation: agent.py calls this directly to repair
+    state["awaiting_confirmation"], not through check_output's violations list.
+    """
+    return bool(_CONFIRMATION_REQUEST_RE.search(text))
+
+
 def wrap_policy(text):
     """Wrap retrieved policy text in explicit delimiters so the system prompt can mark it as data, not instructions."""
     return f"{POLICY_OPEN}\n{text}\n{POLICY_CLOSE}"

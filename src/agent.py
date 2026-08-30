@@ -292,10 +292,13 @@ def _build_system_prompt(session, procedure, state, tools_allowed):
                     "tone or wording -- only an explicit yes counts."
                 )
                 lines.append(
-                    "If this reply IS that confirmation request -- you already know the order, the "
-                    "item, and the reason, and are now asking the customer to confirm -- end your "
-                    "ENTIRE reply with one line, exactly: <<AWAITING_CONFIRMATION>>. Omit it on any "
-                    "other reply, such as one still asking which order or item."
+                    "If this reply asks the customer to confirm before you take an action -- you "
+                    "already know the order, the item, and the reason, and are now asking them to "
+                    "confirm -- you MUST end it with one line, exactly: <<AWAITING_CONFIRMATION>>. "
+                    "This is not optional: asking for confirmation without the marker means the "
+                    "customer's next reply will not be understood as an answer to your question. "
+                    "Omit the marker on any other reply, such as one still asking which order or "
+                    "item."
                 )
 
         escalate_if = procedure.get("escalate_if", [])
@@ -599,6 +602,18 @@ def run_turn(message, session, state, conversation_id, turn):
             clean_text, proposed_matches, proposed_reason = _extract_escalation_marker(loop_result["reply_raw"])
             clean_text, awaiting_confirmation = _strip_awaiting_confirmation_marker(clean_text)
             reply = clean_text
+
+            # Same class of problem as the escalation-claim check below, opposite repair: asking
+            # for confirmation in words without the marker is a structural omission, not a false
+            # statement to the customer, so this fixes the state and notes the correction -- it
+            # does not raise a violation or affect escalated.
+            if not awaiting_confirmation and guardrails.asks_for_confirmation(reply):
+                awaiting_confirmation = True
+                print(
+                    f"[marker-adherence] conversation_id={conversation_id} turn={turn}: "
+                    "awaiting_confirmation inferred from reply text; <<AWAITING_CONFIRMATION>> "
+                    "marker was missing"
+                )
             state["awaiting_confirmation"] = awaiting_confirmation
 
             valid_conditions = {c.strip() for c in (procedure.get("escalate_if", []) if procedure else [])}
