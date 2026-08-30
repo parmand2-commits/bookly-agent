@@ -45,8 +45,9 @@ _IDENTIFIER_RE = re.compile(r"\b(ORD|CUST)-\d+\b")
 # covers escalate/escalating/escalated/escalation, which is the exact word the real failure used
 # ("Your escalation has already been submitted").
 _ESCALATION_CLAIM_RE = re.compile(
-    r"\bescalat\w*|connect(?:ing)? you with|human agent|human support|"
-    r"flag this for|pass this to a colleague|someone will get back",
+    r"\bescalat\w*|connect(?:ed|ing)? you with|human agent|human support|"
+    r"flag(?:ged|ging)? this (?:for|to)|pass(?:ed|ing)? this (?:to|on to) a colleague|"
+    r"someone will get back",
     re.IGNORECASE,
 )
 
