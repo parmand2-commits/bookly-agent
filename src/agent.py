@@ -166,11 +166,15 @@ def _build_system_prompt(session, procedure, state, tools_allowed):
             "damaged'. Not a full sentence, and not a restatement of the whole situation."
         )
         lines.append(
-            f"Each search_policies result carries a score; {config.RETRIEVAL_CONFIDENCE_THRESHOLD} or "
-            "above counts as a confident match. If a call returns nothing that confident, reformulate "
-            "the query ONCE with more specific terms and search again. If that second attempt also "
-            "comes back without a confident match, stop searching and escalate -- never call "
-            "search_policies more than twice in one turn."
+            "Each search_policies result carries a confident flag. Results marked confident=false "
+            "may inform your understanding but must never be cited as policy; if nothing returned is "
+            "confident, escalate rather than answer from it."
+        )
+        lines.append(
+            "If a call returns nothing confident, reformulate the query ONCE with more specific "
+            "terms and search again. If that second attempt also comes back without a confident "
+            "result, stop searching and escalate -- never call search_policies more than twice in "
+            "one turn."
         )
 
     if procedure is None:
@@ -271,7 +275,8 @@ def _run_reasoning_loop(message, session, procedure, tools_allowed, state, custo
 
     tools_called = []
     retrieval_records = []
-    last_search_results = []
+    best_search_results = []
+    best_search_top_score = -1.0  # -1 so even a single empty/zero-score search call is recorded once
     verified_order_ids = set()
     tokens_in = tokens_out = 0
     final_text = None
@@ -305,11 +310,17 @@ def _run_reasoning_loop(message, session, procedure, tools_allowed, state, custo
             ok, result = _dispatch_tool(block.name, block.input, customer_id, state)
             tools_called.append({"name": block.name, "ok": ok})
             if block.name == "search_policies" and isinstance(result, list):
-                last_search_results = result
                 query = block.input.get("query")
                 retrieval_records.extend(
                     {"query": query, "policy_id": r["policy_id"], "score": r["score"]} for r in result
                 )
+                # Keep the search with the highest top score across the whole turn, not just the
+                # last call -- a strong first search followed by a weaker retry must not get
+                # discarded in favour of the weaker one.
+                top_score = result[0]["score"] if result else 0.0
+                if top_score > best_search_top_score:
+                    best_search_top_score = top_score
+                    best_search_results = result
             if block.name in ("lookup_order", "create_return") and ok:
                 order_id = block.input.get("order_id")
                 if order_id:
@@ -333,7 +344,7 @@ def _run_reasoning_loop(message, session, procedure, tools_allowed, state, custo
         "reply_raw": final_text or "",
         "tools_called": tools_called,
         "retrieval": retrieval_records,
-        "last_search_results": last_search_results,
+        "best_search_results": best_search_results,
         "verified_order_ids": verified_order_ids,
         "tokens_in": tokens_in,
         "tokens_out": tokens_out,
@@ -462,7 +473,7 @@ def run_turn(message, session, state, conversation_id, turn):
                 rejected_escalation_proposal = proposed_matches
 
             searched = any(tc["name"] == "search_policies" for tc in tools_called)
-            not_confident = searched and not retrieval.is_confident(loop_result["last_search_results"])
+            not_confident = searched and not retrieval.is_confident(loop_result["best_search_results"])
 
             allowed_ids = (
                 loop_result["verified_order_ids"]
@@ -470,7 +481,7 @@ def run_turn(message, session, state, conversation_id, turn):
                 | {customer_id}
             )
             violations = guardrails.check_output(
-                reply, loop_result["last_search_results"], procedure, allowed_ids=allowed_ids
+                reply, loop_result["best_search_results"], procedure, allowed_ids=allowed_ids
             )
             # check_output conflates two violation kinds in one list. Only a cross-customer identifier
             # leak is an actual leak, so only that kind blanks the reply. An unsupported policy claim

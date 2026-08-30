@@ -88,7 +88,14 @@ def search(query):
                 total += token_idf[token]
         score = total / len(significant_tokens)
         if score > 0:
-            results.append({"policy_id": entry["id"], "score": score, "excerpt": entry["excerpt"]})
+            results.append(
+                {
+                    "policy_id": entry["id"],
+                    "score": score,
+                    "excerpt": entry["excerpt"],
+                    "confident": score >= config.RETRIEVAL_CONFIDENCE_THRESHOLD,
+                }
+            )
 
     results.sort(key=lambda r: r["score"], reverse=True)
     return results[: config.RETRIEVAL_TOP_K]
