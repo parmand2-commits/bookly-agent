@@ -1,7 +1,7 @@
 ---
 id: returns_window
 title: Return window
-aliases: [too late to send it back, bought it months ago, how long do I have, missed the deadline, changed my mind, still eligible]
+aliases: [too late to send it back, bought it months ago, how long do I have, missed the deadline, changed my mind, still eligible, return window, return policy, returns eligibility, how many days to return, return period, return deadline, thirty days, 30 day limit, unread and undamaged, eligibility window, time limit to send back]
 scope: Orders already delivered to the customer
 owner: CX Policy
 last_updated: 2026-08-20

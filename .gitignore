@@ -4,5 +4,6 @@ __pycache__/
 .venv/
 .DS_Store
 *.log
+logs/
 data/returns.seed.json
 .claude/

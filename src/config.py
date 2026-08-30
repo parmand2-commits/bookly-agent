@@ -11,9 +11,9 @@ AGENT_MODEL = "claude-sonnet-5"  # reasoning pass that talks to the customer and
 MAX_TOOL_TURNS = 5  # hard cap on tool round-trips per turn, matches the one-agent-loop invariant
 MAX_CLARIFICATIONS = 2  # how many times the agent may ask the customer to disambiguate before escalating
 
-RETRIEVAL_CONFIDENCE_THRESHOLD = 1.2  # Tuned against measured scores, not guessed. Covered questions score
-# between 1.667 and 2.0; the two deliberate coverage gaps top out at 0.667.
-# 1.2 sits in that band with margin on both sides. When the band closes,
+RETRIEVAL_CONFIDENCE_THRESHOLD = 1.5  # Tuned against measured scores, not guessed. Covered questions score
+# at or above 2.524; the two deliberate coverage gaps top out at 0.775 (retrieval.py's IDF weighting).
+# 1.5 sits in that band with margin on both sides. When the band closes,
 # the fix is a new alias in the policy file, not a new threshold here.
 RETRIEVAL_TOP_K = 3  # max number of policy matches returned per search
 ALIAS_MATCH_WEIGHT = 2.0  # a query token found in a policy's aliases counts for this much more than a body/title hit

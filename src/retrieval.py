@@ -1,5 +1,6 @@
 """Keyword search over data/policies/*.md. No vector database, no embeddings -- an in-memory index built once at import time."""
 
+import math
 import re
 
 import yaml
@@ -48,20 +49,43 @@ def _build_index():
 _INDEX = _build_index()
 
 
+def _document_frequency(index):
+    """Count, for every token in the corpus, how many policy entries contain it at all (title, alias, or body)."""
+    df = {}
+    for entry in index:
+        for token in entry["title_tokens"] | entry["alias_tokens"] | entry["body_tokens"]:
+            df[token] = df.get(token, 0) + 1
+    return df
+
+
+_DOC_FREQUENCY = _document_frequency(_INDEX)
+_NUM_POLICIES = len(_INDEX)
+
+
+def _idf(token):
+    """Inverse document frequency: how much signal one occurrence of token carries, given how many of the corpus's policies contain it."""
+    df = _DOC_FREQUENCY.get(token, 0)
+    if df == 0:
+        return 0.0
+    return math.log(_NUM_POLICIES / df)
+
+
 def search(query):
-    """Score every policy against the query's significant tokens and return up to RETRIEVAL_TOP_K matches, highest score first."""
+    """Score every policy against the query's significant tokens, weighting each hit by the token's rarity across the corpus, and return up to RETRIEVAL_TOP_K matches, highest score first."""
     significant_tokens = [t for t in _tokenize(query) if t not in config.STOPWORDS]
     if not significant_tokens:
         return []
+
+    token_idf = {token: _idf(token) for token in significant_tokens}
 
     results = []
     for entry in _INDEX:
         total = 0.0
         for token in significant_tokens:
             if token in entry["alias_tokens"]:
-                total += config.ALIAS_MATCH_WEIGHT
+                total += config.ALIAS_MATCH_WEIGHT * token_idf[token]
             elif token in entry["title_tokens"] or token in entry["body_tokens"]:
-                total += 1.0
+                total += token_idf[token]
         score = total / len(significant_tokens)
         if score > 0:
             results.append({"policy_id": entry["id"], "score": score, "excerpt": entry["excerpt"]})

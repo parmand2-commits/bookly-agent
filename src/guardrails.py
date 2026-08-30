@@ -7,11 +7,35 @@ from src import retrieval
 POLICY_OPEN, POLICY_CLOSE = "<retrieved_policy>", "</retrieved_policy>"
 USER_OPEN, USER_CLOSE = "<customer_message>", "</customer_message>"
 
-# Numbers shaped like a policy commitment: "30 days", "5 to 10 business days", "20%", "35 EUR" / "35 euros" / "35 EUR".
-_POLICY_CLAIM_RE = re.compile(
-    r"\b\d+(\.\d+)?\s*(day|days|%|percent|eur|euros?)\b|\b(eur|€)\s*\d+(\.\d+)?\b",
+# A day-count on its own ("delivered about 10 days ago") just restates order data, not a policy.
+# It only counts as a policy claim when policy language shows up near it -- see _has_policy_context.
+_DAY_COUNT_RE = re.compile(r"\b\d+(\.\d+)?\s*days?\b", re.IGNORECASE)
+_POLICY_CONTEXT_WORDS = (
+    "window", "policy", "eligib", "entitled", "allowed", "refund", "period", "deadline", "business",
+)
+_CONTEXT_RADIUS = 40  # characters on each side of a day-count to look for policy language
+
+# Percent/currency figures are policy-shaped on their own -- Bookly has no everyday reason to quote
+# a percentage or a price back at a customer outside of a policy (a discount, a fee, a refund amount).
+_PERCENT_OR_CURRENCY_RE = re.compile(
+    r"\b\d+(\.\d+)?\s*(%|percent|eur|euros?)\b|\b(eur|€)\s*\d+(\.\d+)?\b",
     re.IGNORECASE,
 )
+
+
+def _has_policy_context(text, match):
+    """True if policy language appears within _CONTEXT_RADIUS characters of a day-count match."""
+    start = max(0, match.start() - _CONTEXT_RADIUS)
+    end = min(len(text), match.end() + _CONTEXT_RADIUS)
+    window = text[start:end].lower()
+    return any(word in window for word in _POLICY_CONTEXT_WORDS)
+
+
+def _has_unsupported_policy_claim(text):
+    """True if text makes a policy-shaped claim: a percent/currency figure, or a day-count near policy language."""
+    if _PERCENT_OR_CURRENCY_RE.search(text):
+        return True
+    return any(_has_policy_context(text, m) for m in _DAY_COUNT_RE.finditer(text))
 
 # Order/customer identifiers, e.g. ORD-4471, CUST-1001.
 _IDENTIFIER_RE = re.compile(r"\b(ORD|CUST)-\d+\b")
@@ -31,7 +55,7 @@ def check_output(text, retrieval_results, procedure, allowed_ids=None):
     """Return a list of violation strings for text: unsupported policy claims, and (if allowed_ids given) stray identifiers."""
     violations = []
 
-    if _POLICY_CLAIM_RE.search(text) and not retrieval.is_confident(retrieval_results):
+    if _has_unsupported_policy_claim(text) and not retrieval.is_confident(retrieval_results):
         violations.append("policy-shaped claim made with no confident retrieval behind it")
 
     # allowed_ids is optional because check_output's own signature carries no session reference;
