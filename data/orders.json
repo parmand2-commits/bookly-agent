@@ -77,9 +77,9 @@
   "ORD-4402": {
     "order_id": "ORD-4402",
     "customer_id": "CUST-1002",
-    "order_date": "2026-08-28",
+    "order_date": "2026-08-20",
     "order_status": "delivered",
-    "delivery_date": "2026-09-03",
+    "delivery_date": "2026-08-25",
     "shipping_country": "FR",
     "shipping_cost_eur": 0.0,
     "payment_last4": "8823",
