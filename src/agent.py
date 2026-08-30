@@ -38,7 +38,21 @@ _STATE_DEFAULTS = {
     "confirmed": False,
     "clarification_count": 0,
     "tool_turns": 0,
+    "awaiting_confirmation": False,  # last assistant reply ended with <<AWAITING_CONFIRMATION>>
+    "messages": [],  # the reasoning call's conversation history, carried across turns
+    # Orders lookup_order/create_return have already verified belong to this customer, carried
+    # across turns for the same reason messages is: the output guardrail's allowed_ids check was
+    # written when the model had no memory and could only ever mention an order it had just looked
+    # up that same turn. Conversation history invalidated that assumption -- the model can now
+    # recall an order named several turns ago on a turn that calls no tool at all. The security
+    # property is unchanged: an id only ever enters this set via the ok==True branch below, after
+    # tools.py's own per-customer authorization check has already approved it -- nothing else
+    # writes to it, so persisting it doesn't relax the check, it just lets the check remember what
+    # it already verified instead of forgetting it every turn.
+    "verified_order_ids": set(),
 }
+
+MAX_HISTORY_MESSAGES = 20  # cap on state["messages"]; see the trim at the end of _run_reasoning_loop
 
 _AFFIRMATION_PHRASES = [
     "yes", "yep", "yeah", "ok", "okay", "sure", "go ahead", "do it",
@@ -52,12 +66,58 @@ _MARKER_FULL_RE = re.compile(
     re.IGNORECASE | re.DOTALL,
 )
 
+_AWAITING_CONFIRMATION_RE = re.compile(r"<<\s*AWAITING_CONFIRMATION\s*>>", re.IGNORECASE)
+
 
 def _init_state(state):
-    """Fill in any missing keys of the task-state dict with their defaults, in place."""
+    """Fill in any missing keys of the task-state dict with their defaults, in place.
+
+    dict/list/set defaults are copied per call -- do not simplify this back to
+    `default if isinstance(default, dict) else default`. _STATE_DEFAULTS holds exactly one
+    "collected" dict, one "messages" list, and one "verified_order_ids" set for the whole process;
+    without copying, every conversation's state would setdefault to those same shared objects, so
+    one customer's tool args, conversation history, or verified orders would leak into every other
+    customer's prompt.
+    """
     for key, default in _STATE_DEFAULTS.items():
-        state.setdefault(key, dict(default) if isinstance(default, dict) else default)
+        if isinstance(default, dict):
+            state.setdefault(key, dict(default))
+        elif isinstance(default, list):
+            state.setdefault(key, list(default))
+        elif isinstance(default, set):
+            state.setdefault(key, set(default))
+        else:
+            state.setdefault(key, default)
     return state
+
+
+def _pending_confirmation(state):
+    """True if state, as carried into this turn, is mid-way through the create_return confirmation
+    dance for its currently loaded procedure -- computed before (re)classifying the message.
+
+    An affirmation like "yes, go ahead" has no content a classifier can key off of; reclassifying
+    it risks flipping intent to "none", which trips the intent-change reset and drops the very
+    confirmation this message is trying to give.
+
+    Gated on order_id already known and state["awaiting_confirmation"] (set from the
+    <<AWAITING_CONFIRMATION>> marker the agent's own last reply ended with), not on every
+    required_info key being in collected: item_sku/reason are only ever captured via a
+    create_return call, which the agent is correctly told never to make before confirmation, so
+    that gate could never fire on a multi-item disambiguation path. This one depends on what the
+    agent actually did, not on tool arguments it was told never to send.
+    """
+    intent = state["intent"]
+    if not intent or intent == "none":
+        return False
+    try:
+        procedure = procedures.load_procedure(intent)
+    except ValueError:
+        return False
+    if "create_return" not in procedure.get("tools_allowed", []):
+        return False
+    if state["confirmed"]:
+        return False
+    return "order_id" in state["collected"] and state["awaiting_confirmation"]
 
 
 def _is_explicit_affirmation(message):
@@ -79,6 +139,17 @@ def _extract_escalation_marker(text):
     if match:
         return clean_text, match.group("matches").strip(), match.group("reason").strip()
     return clean_text, None, None
+
+
+def _strip_awaiting_confirmation_marker(text):
+    """Strip a trailing <<AWAITING_CONFIRMATION>> marker from text, if present. Same technique as
+    _extract_escalation_marker: the marker is never shown to the customer, only used to gate next
+    turn's pending_confirmation. Returns (clean_text, awaiting_confirmation).
+    """
+    match = _AWAITING_CONFIRMATION_RE.search(text)
+    if not match:
+        return text.rstrip(), False
+    return text[: match.start()].rstrip(), True
 
 
 def _cost_usd(model, tokens_in, tokens_out):
@@ -158,6 +229,11 @@ def _build_system_prompt(session, procedure, state, tools_allowed):
     )
 
     if "search_policies" in tools_allowed:
+        lines.append(
+            "Only call search_policies when answering the customer actually requires a policy "
+            "lookup. If a tool result you already have (e.g. an order's status) answers the "
+            "question on its own, reply from it directly -- do not search as a precaution."
+        )
         # Retrieval is plain keyword matching (no embeddings), scored against short customer-style
         # phrasings. A long, descriptive query dilutes the score against the right document.
         lines.append(
@@ -203,6 +279,12 @@ def _build_system_prompt(session, procedure, state, tools_allowed):
                     "The customer has NOT confirmed yet. Never call create_return. Summarise the "
                     "return and ask for explicit confirmation first. Never infer confirmation from "
                     "tone or wording -- only an explicit yes counts."
+                )
+                lines.append(
+                    "If this reply IS that confirmation request -- you already know the order, the "
+                    "item, and the reason, and are now asking the customer to confirm -- end your "
+                    "ENTIRE reply with one line, exactly: <<AWAITING_CONFIRMATION>>. Omit it on any "
+                    "other reply, such as one still asking which order or item."
                 )
 
         escalate_if = procedure.get("escalate_if", [])
@@ -267,17 +349,43 @@ def _dispatch_tool(name, tool_input, customer_id, state):
     return ok, result
 
 
+def _trim_history(messages, max_messages):
+    """Drop the oldest whole turns from messages until it's at or under max_messages.
+
+    Must cut only at turn boundaries, never in the middle: a turn's messages interleave
+    assistant tool_use blocks with the matching tool_result content in the next message, and the
+    Anthropic API rejects a tool_result with no tool_use in view. A turn boundary is a user
+    message whose content is the plain wrapped customer string, not a tool_result list -- that
+    shape only occurs once per turn, at the start. The most recent turn is always kept whole even
+    if it alone is longer than max_messages.
+    """
+    if len(messages) <= max_messages:
+        return messages
+    turn_starts = [i for i, m in enumerate(messages) if m["role"] == "user" and isinstance(m["content"], str)]
+    if not turn_starts:
+        return messages
+    cut = turn_starts[-1]
+    for start in turn_starts:
+        if len(messages) - start <= max_messages:
+            cut = start
+            break
+    return messages[cut:]
+
+
 def _run_reasoning_loop(message, session, procedure, tools_allowed, state, customer_id):
     """Run the bounded AGENT_MODEL tool-use loop for this turn. Returns a dict of everything the caller needs."""
     system_prompt = _build_system_prompt(session, procedure, state, tools_allowed)
     tool_schemas = tools.get_schemas(tools_allowed)
-    messages = [{"role": "user", "content": guardrails.wrap_user_message(message)}]
+    # The conversation persists in state across turns -- system_prompt is rebuilt fresh each turn
+    # from current state and carries the "now," messages carries what was actually said, which is
+    # what lets the model resolve "the Prince" on a later turn without collected having to hold it.
+    state["messages"].append({"role": "user", "content": guardrails.wrap_user_message(message)})
+    messages = state["messages"]
 
     tools_called = []
     retrieval_records = []
     best_search_results = []
     best_search_top_score = -1.0  # -1 so even a single empty/zero-score search call is recorded once
-    verified_order_ids = set()
     tokens_in = tokens_out = 0
     final_text = None
     network_error = None
@@ -308,7 +416,12 @@ def _run_reasoning_loop(message, session, procedure, tools_allowed, state, custo
         tool_results = []
         for block in tool_use_blocks:
             ok, result = _dispatch_tool(block.name, block.input, customer_id, state)
-            tools_called.append({"name": block.name, "ok": ok})
+            tools_called.append({
+                "name": block.name,
+                "ok": ok,
+                "error": result.get("error") if not ok else None,
+                "input": block.input,
+            })
             if block.name == "search_policies" and isinstance(result, list):
                 query = block.input.get("query")
                 retrieval_records.extend(
@@ -324,7 +437,7 @@ def _run_reasoning_loop(message, session, procedure, tools_allowed, state, custo
             if block.name in ("lookup_order", "create_return") and ok:
                 order_id = block.input.get("order_id")
                 if order_id:
-                    verified_order_ids.add(order_id)
+                    state["verified_order_ids"].add(order_id)
             tool_results.append(
                 {
                     "type": "tool_result",
@@ -340,12 +453,14 @@ def _run_reasoning_loop(message, session, procedure, tools_allowed, state, custo
         exhausted = True
         final_text = ""
 
+    # Bound state["messages"] so a long-running conversation's prompt cannot grow unboundedly.
+    state["messages"] = _trim_history(state["messages"], MAX_HISTORY_MESSAGES)
+
     return {
         "reply_raw": final_text or "",
         "tools_called": tools_called,
         "retrieval": retrieval_records,
         "best_search_results": best_search_results,
-        "verified_order_ids": verified_order_ids,
         "tokens_in": tokens_in,
         "tokens_out": tokens_out,
         "exhausted": exhausted,
@@ -401,7 +516,10 @@ def run_turn(message, session, state, conversation_id, turn):
     customer_id = session["customer"]["customer_id"]
     prior_intent = state["intent"]
 
-    intent, classify_usage, classify_error = _classify_raw(message, session)
+    if _pending_confirmation(state):
+        intent, classify_usage, classify_error = state["intent"], {"input": 0, "output": 0}, None
+    else:
+        intent, classify_usage, classify_error = _classify_raw(message, session)
 
     if classify_error is not None:
         reply = (
@@ -431,12 +549,15 @@ def run_turn(message, session, state, conversation_id, turn):
         state["procedure"] = procedure["intent"] if procedure else None
         procedure_name = state["procedure"]
 
-        required_info = procedure.get("required_info", []) if procedure else []
+        # Same gate as _pending_confirmation, evaluated with this turn's just-loaded procedure/
+        # tools_allowed rather than reloading them: order_id known plus the agent's own last reply
+        # having asked for confirmation, not every required_info key already in collected.
         pending_confirmation = (
             procedure is not None
             and "create_return" in tools_allowed
             and not state["confirmed"]
-            and all(key in state["collected"] for key in required_info)
+            and "order_id" in state["collected"]
+            and state["awaiting_confirmation"]
         )
         if pending_confirmation:
             if _is_explicit_affirmation(message):
@@ -465,7 +586,9 @@ def run_turn(message, session, state, conversation_id, turn):
             escalation_triggers = ["reasoning_call_failed"]
         else:
             clean_text, proposed_matches, proposed_reason = _extract_escalation_marker(loop_result["reply_raw"])
+            clean_text, awaiting_confirmation = _strip_awaiting_confirmation_marker(clean_text)
             reply = clean_text
+            state["awaiting_confirmation"] = awaiting_confirmation
 
             valid_conditions = {c.strip() for c in (procedure.get("escalate_if", []) if procedure else [])}
             proposal_valid = proposed_matches is not None and proposed_matches in valid_conditions
@@ -476,7 +599,7 @@ def run_turn(message, session, state, conversation_id, turn):
             not_confident = searched and not retrieval.is_confident(loop_result["best_search_results"])
 
             allowed_ids = (
-                loop_result["verified_order_ids"]
+                state["verified_order_ids"]
                 | {o["order_id"] for o in session["open_orders"]}
                 | {customer_id}
             )
