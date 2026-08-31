@@ -6,4 +6,5 @@ __pycache__/
 *.log
 logs/
 data/returns.seed.json
-.claude/
+.claude/data/returns.backup.json
+
