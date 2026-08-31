@@ -39,6 +39,9 @@ _STATE_DEFAULTS = {
     "clarification_count": 0,
     "tool_turns": 0,
     "awaiting_confirmation": False,  # last assistant reply ended with <<AWAITING_CONFIRMATION>>
+    # last assistant reply asked the customer something -- ends with '?' or matches
+    # asks_for_confirmation. Gates _skip_classification, see its docstring.
+    "last_reply_was_question": False,
     "messages": [],  # the reasoning call's conversation history, carried across turns
     # Orders lookup_order/create_return have already verified belong to this customer, carried
     # across turns for the same reason messages is: the output guardrail's allowed_ids check was
@@ -91,33 +94,26 @@ def _init_state(state):
     return state
 
 
-def _pending_confirmation(state):
-    """True if state, as carried into this turn, is mid-way through the create_return confirmation
-    dance for its currently loaded procedure -- computed before (re)classifying the message.
-
-    An affirmation like "yes, go ahead" has no content a classifier can key off of; reclassifying
-    it risks flipping intent to "none", which trips the intent-change reset and drops the very
-    confirmation this message is trying to give.
-
-    Gated on order_id already known and state["awaiting_confirmation"] (set from the
-    <<AWAITING_CONFIRMATION>> marker the agent's own last reply ended with), not on every
-    required_info key being in collected: item_sku/reason are only ever captured via a
-    create_return call, which the agent is correctly told never to make before confirmation, so
-    that gate could never fire on a multi-item disambiguation path. This one depends on what the
-    agent actually did, not on tool arguments it was told never to send.
+def _reply_asks_question(text):
+    """True if text ends with a question mark or matches the same confirmation-request language
+    guardrails.asks_for_confirmation looks for -- the two shapes a procedure step's reply takes
+    when it is waiting on an answer, from "which item?" to "shall I proceed?".
     """
-    intent = state["intent"]
-    if not intent or intent == "none":
-        return False
-    try:
-        procedure = procedures.load_procedure(intent)
-    except ValueError:
-        return False
-    if "create_return" not in procedure.get("tools_allowed", []):
-        return False
-    if state["confirmed"]:
-        return False
-    return "order_id" in state["collected"] and state["awaiting_confirmation"]
+    return text.rstrip().endswith("?") or guardrails.asks_for_confirmation(text)
+
+
+def _skip_classification(state):
+    """True if state, as carried into this turn, has a procedure loaded whose last reply to the
+    customer asked a question -- computed before (re)classifying the message.
+
+    A short answer to the agent's own question ("The Prince, the Machiavelli one", "yes, go
+    ahead") has no content a classifier can key off of on its own; reclassifying it risks flipping
+    intent to "none", which trips the intent-change reset and drops the procedure mid-flow. This
+    generalizes what used to be a create_return-confirmation-only gate: any procedure step that
+    asks the customer something produces the same kind of contentless answer, not just the final
+    confirmation step.
+    """
+    return bool(state["procedure"]) and state["last_reply_was_question"]
 
 
 def _is_explicit_affirmation(message):
@@ -530,7 +526,7 @@ def run_turn(message, session, state, conversation_id, turn):
     customer_id = session["customer"]["customer_id"]
     prior_intent = state["intent"]
 
-    if _pending_confirmation(state):
+    if _skip_classification(state):
         intent, classify_usage, classify_error = state["intent"], {"input": 0, "output": 0}, None
     else:
         intent, classify_usage, classify_error = _classify_raw(message, session)
@@ -543,6 +539,7 @@ def run_turn(message, session, state, conversation_id, turn):
         escalated = True
         escalation_reason = f"classification call failed: {classify_error}"
         escalation_triggers = ["classification_failed"]
+        state["last_reply_was_question"] = False
         tokens_in, tokens_out = classify_usage["input"], classify_usage["output"]
         cost = _cost_usd(config.CLASSIFIER_MODEL, tokens_in, tokens_out)
         procedure_name = state["procedure"]
@@ -563,9 +560,10 @@ def run_turn(message, session, state, conversation_id, turn):
         state["procedure"] = procedure["intent"] if procedure else None
         procedure_name = state["procedure"]
 
-        # Same gate as _pending_confirmation, evaluated with this turn's just-loaded procedure/
-        # tools_allowed rather than reloading them: order_id known plus the agent's own last reply
-        # having asked for confirmation, not every required_info key already in collected.
+        # Narrower than _skip_classification's question-detection: this is specifically the
+        # create_return confirmation dance, evaluated with this turn's just-loaded procedure/
+        # tools_allowed rather than reloading them -- order_id known plus the agent's own last
+        # reply having asked for confirmation, not every required_info key being in collected.
         pending_confirmation = (
             procedure is not None
             and "create_return" in tools_allowed
@@ -598,6 +596,7 @@ def run_turn(message, session, state, conversation_id, turn):
             escalated = True
             escalation_reason = f"reasoning call failed: {loop_result['network_error']}"
             escalation_triggers = ["reasoning_call_failed"]
+            state["last_reply_was_question"] = False
         else:
             clean_text, proposed_matches, proposed_reason = _extract_escalation_marker(loop_result["reply_raw"])
             clean_text, awaiting_confirmation = _strip_awaiting_confirmation_marker(clean_text)
@@ -646,6 +645,10 @@ def run_turn(message, session, state, conversation_id, turn):
             claim_violations = [v for v in violations if "belonging to this customer" not in v]
             if leak_violations:
                 reply = "I'm sorry, I'm not able to share that here -- connecting you with a member of our team."
+
+            # Reflects the reply actually sent to the customer, after the leak override above --
+            # a turn that got blanked for a leak isn't a question the next message is answering.
+            state["last_reply_was_question"] = _reply_asks_question(reply)
 
             # Every trigger is evaluated independently, in this fixed order, so escalation_triggers
             # captures everything that fired this turn -- not just whichever one is chosen as the
